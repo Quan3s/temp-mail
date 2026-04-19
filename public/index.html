@@ -3,126 +3,203 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⚡ Pro Temp Mail</title>
+    <title>⚡ Multi-Temp Mail Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .active-tab { border-bottom: 3px solid #3b82f6; color: #3b82f6; }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+    </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen">
-    <div class="max-w-md mx-auto p-4">
-        <div class="text-center my-8">
-            <h1 class="text-3xl font-bold text-blue-400">⚡ Pro Temp Mail</h1>
-            <p class="text-slate-400 text-sm">Email tạm thời cho iOS & iSH</p>
+<body class="bg-slate-950 text-slate-200 min-h-screen font-sans">
+    <div class="max-w-2xl mx-auto p-4">
+        <div class="flex bg-slate-900 rounded-t-xl overflow-hidden border-b border-slate-800">
+            <button onclick="switchTab(1)" id="tab1-btn" class="flex-1 py-4 font-bold active-tab transition">API 1 (Mail.tm)</button>
+            <button onclick="switchTab(2)" id="tab2-btn" class="flex-1 py-4 font-bold text-slate-500 transition">API 2 (1SecMail)</button>
         </div>
 
-        <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 mb-6">
-            <label class="text-xs text-slate-500 uppercase font-bold">Địa chỉ của bạn</label>
-            <div class="flex mt-2">
-                <input id="email-addr" readonly type="text" value="Đang tạo..." 
-                    class="bg-slate-900 border border-slate-700 text-blue-300 w-full p-3 rounded-l-lg outline-none text-sm">
-                <button onclick="copyEmail()" class="bg-blue-600 px-4 rounded-r-lg hover:bg-blue-500">
-                    <i class="fa-regular fa-copy"></i>
-                </button>
-            </div>
-            <button onclick="createNewEmail()" class="w-full mt-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm transition">
-                <i class="fa-solid fa-rotate mr-2"></i> Đổi địa chỉ mới
-            </button>
-        </div>
-
-        <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
-            <div class="p-4 border-b border-slate-700 flex justify-between items-center">
-                <h2 class="font-bold">Hộp thư đến</h2>
-                <span id="status" class="text-[10px] bg-green-500/20 text-green-400 px-2 py-1 rounded-full animate-pulse">Live</span>
-            </div>
-            <div id="messages" class="divide-y divide-slate-700 min-h-[300px]">
-                <div class="p-8 text-center text-slate-500">
-                    <i class="fa-solid fa-inbox text-4xl mb-3 block"></i>
-                    Đang chờ thư đến...
+        <div class="bg-slate-900 p-4 rounded-b-xl border border-t-0 border-slate-800 shadow-2xl">
+            <div id="tab1-content">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-sm font-bold uppercase text-slate-500">Quản lý hòm thư (Max 5)</h2>
+                    <button onclick="addMailTM()" class="bg-blue-600 hover:bg-blue-500 text-xs px-3 py-1 rounded-full">+ Thêm Mail</button>
                 </div>
+                <div id="list-accounts" class="space-y-2 mb-6"></div>
+            </div>
+
+            <div id="tab2-content" class="hidden">
+                <p class="text-xs text-amber-400 mb-4 font-mono">// API 2 không cần login, nhận mail tức thì.</p>
+                <button onclick="add1SecMail()" class="w-full bg-indigo-600 py-2 rounded-lg mb-4 hover:bg-indigo-500 transition text-sm">Tạo Mail 1SecMail</button>
+                <div id="list-1sec" class="space-y-2"></div>
+            </div>
+        </div>
+
+        <div class="mt-6 bg-slate-900 rounded-xl border border-slate-800 overflow-hidden shadow-2xl">
+            <div class="p-4 bg-slate-800/50 border-b border-slate-700 flex justify-between items-center">
+                <span id="inbox-title" class="font-bold text-blue-400 italic italic">Đang xem: Chưa chọn hòm thư</span>
+                <button onclick="refreshCurrent()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-sync"></i></button>
+            </div>
+            <div id="messages" class="min-h-[300px] max-h-[500px] overflow-y-auto divide-y divide-slate-800">
+                <div class="p-10 text-center text-slate-600">Chọn một hòm thư phía trên để check mail</div>
             </div>
         </div>
     </div>
 
-    <div id="mail-modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4">
-        <div class="bg-slate-800 w-full max-w-lg rounded-2xl max-h-[80vh] overflow-y-auto p-6 border border-slate-600">
-            <div class="flex justify-between mb-4">
-                <h3 id="modal-subject" class="font-bold text-lg text-blue-400"></h3>
-                <button onclick="closeModal()" class="text-slate-400"><i class="fa-solid fa-xmark"></i></button>
+    <div id="mail-modal" class="hidden fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50">
+        <div class="bg-slate-900 w-full max-w-2xl rounded-2xl border border-slate-700 overflow-hidden">
+            <div class="p-4 border-b border-slate-700 flex justify-between bg-slate-800">
+                <h3 id="m-subj" class="font-bold truncate pr-4 text-blue-300"></h3>
+                <button onclick="closeModal()" class="text-slate-400 text-2xl">&times;</button>
             </div>
-            <div id="modal-content" class="text-slate-300 text-sm overflow-x-auto bg-white p-4 rounded text-black"></div>
+            <div id="m-body" class="p-4 bg-white text-black h-[70vh] overflow-y-auto"></div>
         </div>
     </div>
 
     <script>
-        const API = 'https://api.mail.tm';
-        let account = null;
-        let token = '';
+        // Cấu hình & Storage
+        let accountsTM = JSON.parse(localStorage.getItem('accountsTM')) || [];
+        let accounts1Sec = JSON.parse(localStorage.getItem('accounts1Sec')) || [];
+        let currentView = { type: null, addr: null, token: null };
 
-        async function createNewEmail() {
-            document.getElementById('email-addr').value = "Đang tạo...";
+        // Hàm tạo Username "Real" hơn
+        function genUser() {
+            const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+            let len = Math.floor(Math.random() * 10) + 5; // 5-15 ký tự
+            let res = '';
+            for(let i=0; i<len; i++) res += chars.charAt(Math.floor(Math.random() * chars.length));
+            return res;
+        }
+
+        // --- API 1: MAIL.TM ---
+        async function addMailTM() {
+            if(accountsTM.length >= 5) return alert("Tối đa 5 hòm thư thôi sếp!");
             try {
-                const domains = await fetch(`${API}/domains`).then(r => r.json());
+                const domains = await fetch('https://api.mail.tm/domains').then(r => r.json());
                 const domain = domains['hydra:member'][0].domain;
-                const address = `user${Math.floor(Math.random()*999999)}@${domain}`;
-                const password = 'password123';
+                const address = `${genUser()}@${domain}`;
+                const password = 'propassword123';
 
-                await fetch(`${API}/accounts`, {
+                await fetch('https://api.mail.tm/accounts', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ address, password })
                 });
 
-                const auth = await fetch(`${API}/token`, {
+                const auth = await fetch('https://api.mail.tm/token', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ address, password })
                 }).then(r => r.json());
 
-                token = auth.token;
-                document.getElementById('email-addr').value = address;
-                fetchMessages();
-            } catch (e) { alert("Lỗi khi tạo mail!"); }
+                accountsTM.push({ address, token: auth.token });
+                saveAndRender();
+            } catch(e) { alert("Lỗi kết nối API 1"); }
         }
 
-        async function fetchMessages() {
-            if (!token) return;
-            const res = await fetch(`${API}/messages`, {
-                headers: { 'Authorization': `Bearer ${token}` }
+        async function fetchTM(addr, token) {
+            currentView = { type: 'tm', addr, token };
+            document.getElementById('inbox-title').innerText = addr;
+            const res = await fetch('https://api.mail.tm/messages', {
+                headers: {'Authorization': `Bearer ${token}`}
             }).then(r => r.json());
+            renderMessages(res['hydra:member'], 'tm');
+        }
+
+        // --- API 2: 1SECMAIL ---
+        function add1SecMail() {
+            const domainList = ['1secmail.com', '1secmail.org', '1secmail.net'];
+            const domain = domainList[Math.floor(Math.random()*domainList.length)];
+            const address = `${genUser()}@${domain}`;
+            accounts1Sec.push({ address });
+            saveAndRender();
+        }
+
+        async function fetch1Sec(addr) {
+            currentView = { type: '1sec', addr };
+            document.getElementById('inbox-title').innerText = addr;
+            const [user, domain] = addr.split('@');
+            const res = await fetch(`https://www.1secmail.com/api/v1/?action=getMessages&login=${user}&domain=${domain}`).then(r => r.json());
+            renderMessages(res, '1sec');
+        }
+
+        // --- UI RENDER ---
+        function saveAndRender() {
+            localStorage.setItem('accountsTM', JSON.stringify(accountsTM));
+            localStorage.setItem('accounts1Sec', JSON.stringify(accounts1Sec));
             
+            // Render list TM
+            document.getElementById('list-accounts').innerHTML = accountsTM.map((a, i) => `
+                <div class="flex items-center bg-slate-800 p-2 rounded border border-slate-700">
+                    <div onclick="fetchTM('${a.address}', '${a.token}')" class="flex-1 truncate text-sm cursor-pointer hover:text-blue-400">${a.address}</div>
+                    <button onclick="deleteMail('tm', ${i})" class="text-red-500 px-2"><i class="fa-solid fa-trash-can text-xs"></i></button>
+                </div>
+            `).join('');
+
+            // Render list 1Sec
+            document.getElementById('list-1sec').innerHTML = accounts1Sec.map((a, i) => `
+                <div class="flex items-center bg-slate-800 p-2 rounded border border-slate-700">
+                    <div onclick="fetch1Sec('${a.address}')" class="flex-1 truncate text-sm cursor-pointer hover:text-indigo-400">${a.address}</div>
+                    <button onclick="deleteMail('1sec', ${i})" class="text-red-500 px-2"><i class="fa-solid fa-trash-can text-xs"></i></button>
+                </div>
+            `).join('');
+        }
+
+        function renderMessages(mails, type) {
             const container = document.getElementById('messages');
-            const mails = res['hydra:member'];
+            if(!mails.length) return container.innerHTML = '<div class="p-10 text-center text-slate-600 italic">Hòm thư trống...</div>';
             
-            if (mails.length > 0) {
-                container.innerHTML = mails.map(m => `
-                    <div onclick="readMail('${m.id}')" class="p-4 hover:bg-slate-700/50 cursor-pointer transition">
-                        <div class="text-xs text-blue-400 font-bold">${m.from.address}</div>
-                        <div class="text-sm font-semibold truncate">${m.subject}</div>
-                        <div class="text-[10px] text-slate-500 mt-1">${new Date(m.createdAt).toLocaleTimeString()}</div>
-                    </div>
-                `).join('');
-            }
+            container.innerHTML = mails.map(m => `
+                <div onclick="readDetails('${type}', '${m.id}')" class="p-4 hover:bg-slate-800 transition cursor-pointer border-l-4 border-transparent hover:border-blue-500">
+                    <div class="text-xs text-blue-400">${type === 'tm' ? m.from.address : m.from}</div>
+                    <div class="text-sm font-bold truncate">${m.subject}</div>
+                </div>
+            `).join('');
         }
 
-        async function readMail(id) {
-            const res = await fetch(`${API}/messages/${id}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            }).then(r => r.json());
-            
-            document.getElementById('modal-subject').innerText = res.subject;
-            document.getElementById('modal-content').innerHTML = res.html || `<pre>${res.text}</pre>`;
+        async function readDetails(type, id) {
+            let html = '';
+            if(type === 'tm') {
+                const res = await fetch(`https://api.mail.tm/messages/${id}`, {
+                    headers: {'Authorization': `Bearer ${currentView.token}`}
+                }).then(r => r.json());
+                html = res.html || `<pre>${res.text}</pre>`;
+            } else {
+                const [user, domain] = currentView.addr.split('@');
+                const res = await fetch(`https://www.1secmail.com/api/v1/?action=readMessage&login=${user}&domain=${domain}&id=${id}`).then(r => r.json());
+                html = res.htmlBody || `<pre>${res.textBody}</pre>`;
+            }
+            document.getElementById('m-body').innerHTML = html;
             document.getElementById('mail-modal').classList.remove('hidden');
         }
 
-        function closeModal() { document.getElementById('mail-modal').classList.add('hidden'); }
-        function copyEmail() {
-            const input = document.getElementById('email-addr');
-            input.select();
-            navigator.clipboard.writeText(input.value);
-            alert("Đã copy!");
+        function deleteMail(type, index) {
+            if(type === 'tm') accountsTM.splice(index, 1);
+            else accounts1Sec.splice(index, 1);
+            if(currentView.addr) { // Reset view if deleting current
+                document.getElementById('messages').innerHTML = '<div class="p-10 text-center">Đã xóa hòm thư.</div>';
+                document.getElementById('inbox-title').innerText = 'Chưa chọn hòm thư';
+            }
+            saveAndRender();
         }
 
-        setInterval(fetchMessages, 5000);
-        createNewEmail();
+        function switchTab(t) {
+            document.getElementById('tab1-content').classList.toggle('hidden', t !== 1);
+            document.getElementById('tab2-content').classList.toggle('hidden', t !== 2);
+            document.getElementById('tab1-btn').className = t === 1 ? 'flex-1 py-4 font-bold active-tab' : 'flex-1 py-4 font-bold text-slate-500';
+            document.getElementById('tab2-btn').className = t === 2 ? 'flex-1 py-4 font-bold active-tab' : 'flex-1 py-4 font-bold text-slate-500';
+        }
+
+        function refreshCurrent() {
+            if(currentView.type === 'tm') fetchTM(currentView.addr, currentView.token);
+            if(currentView.type === '1sec') fetch1Sec(currentView.addr);
+        }
+
+        function closeModal() { document.getElementById('mail-modal').classList.add('hidden'); }
+
+        // Khởi chạy
+        saveAndRender();
+        setInterval(refreshCurrent, 10000); // Tự refresh mỗi 10s
     </script>
 </body>
 </html>
