@@ -2,168 +2,149 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>⚡ Ultimate Temp Mail - Đa API</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚡ Ultimate Temp Mail</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        .active-tab { border-bottom: 3px solid #3b82f6; color: #3b82f6; background: rgba(30, 41, 59, 0.7); }
+        .active-tab { border-bottom: 3px solid #3b82f6; color: #3b82f6; background: rgba(30, 41, 59, 0.5); }
         .mail-card:hover .action-btns { opacity: 1; }
-        .action-btns { opacity: 0.6; transition: opacity 0.2s; }
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: #475569; border-radius: 10px; }
-        .modal-content { max-height: 90vh; }
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-        .animate-fadeIn { animation: fadeIn 0.2s ease-out; }
     </style>
 </head>
-<body class="bg-[#0f172a] text-slate-200 min-h-screen font-sans antialiased">
+<body class="bg-[#0f172a] text-slate-200 min-h-screen font-sans">
+    <div class="max-w-xl mx-auto p-4">
+        <header class="text-center py-6">
+            <h1 class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-500">ULTIMATE TEMP MAIL</h1>
+        </header>
 
-<div class="max-w-xl mx-auto p-4">
-    <!-- Header -->
-    <header class="text-center py-6">
-        <h1 class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400">
-            ⚡ ULTIMATE TEMP MAIL
-        </h1>
-        <p class="text-xs text-slate-500 mt-1">Hỗ trợ 10+ dịch vụ · Email tạm thời · Tự động chọn API</p>
-    </header>
-
-    <!-- Tabs -->
-    <div class="flex bg-slate-900/80 rounded-t-2xl border-t border-x border-slate-800 overflow-hidden">
-        <button id="tab1-btn" onclick="switchTab(1)" class="flex-1 py-4 text-sm font-bold active-tab transition-all">
-            <i class="fa-solid fa-user-tag mr-2"></i> MAIL ĐƠN
-        </button>
-        <button id="tab2-btn" onclick="switchTab(2)" class="flex-1 py-4 text-sm font-bold text-slate-500 transition-all">
-            <i class="fa-solid fa-users-gear mr-2"></i> ĐA HÒM THƯ
-        </button>
-    </div>
-
-    <!-- Tab content container -->
-    <div class="bg-slate-900/80 p-5 rounded-b-2xl border border-slate-800 shadow-2xl mb-6">
-        <!-- Tab 1: Single Mail -->
-        <div id="tab1-content">
-            <div id="single-mail-area"></div>
-        </div>
-
-        <!-- Tab 2: Multi Mail -->
-        <div id="tab2-content" class="hidden">
-            <div class="flex justify-between items-center mb-4">
-                <span class="text-[10px] font-bold text-slate-500 tracking-widest uppercase">Danh sách (tối đa 5 mail)</span>
-                <button onclick="addMail(true)" id="add-multi-btn" class="bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-bold px-3 py-1 rounded-full transition disabled:opacity-50">
-                    + THÊM HÒM THƯ
-                </button>
-            </div>
-            <div id="multi-mail-list" class="space-y-3"></div>
-        </div>
-    </div>
-
-    <!-- Inbox Panel -->
-    <div class="bg-slate-900/80 rounded-2xl border border-slate-800 overflow-hidden shadow-2xl">
-        <div class="p-4 bg-slate-800/40 border-b border-slate-800 flex justify-between items-center">
-            <div class="flex items-center space-x-2 min-w-0">
-                <div class="w-2 h-2 bg-green-500 rounded-full animate-ping flex-shrink-0"></div>
-                <span id="current-label" class="text-xs font-mono text-blue-400 truncate max-w-[200px]" title="Chưa chọn hòm thư">Chọn hòm thư...</span>
-                <span id="api-badge" class="text-[9px] bg-slate-700 text-slate-300 px-2 py-0.5 rounded-full hidden"></span>
-            </div>
-            <button onclick="refreshInbox()" class="text-slate-500 hover:text-white transition p-1" title="Làm mới hộp thư">
-                <i class="fa-solid fa-rotate"></i>
+        <div class="flex bg-slate-900/80 rounded-t-2xl border-t border-x border-slate-800 overflow-hidden">
+            <button onclick="switchTab(1)" id="tab1-btn" class="flex-1 py-4 text-sm font-bold active-tab transition-all">
+                <i class="fa-solid fa-user-tag mr-2"></i> MAIL ĐƠN
+            </button>
+            <button onclick="switchTab(2)" id="tab2-btn" class="flex-1 py-4 text-sm font-bold text-slate-500 transition-all">
+                <i class="fa-solid fa-users-gear mr-2"></i> ĐA HÒM THƯ
             </button>
         </div>
-        <div id="inbox-content" class="min-h-[350px] max-h-[500px] overflow-y-auto divide-y divide-slate-800/50">
-            <div class="p-20 text-center text-slate-600">
-                <i class="fa-solid fa-envelope-open-text text-4xl mb-4 block opacity-20"></i>
-                <span class="text-sm">Hộp thư đang trống</span>
+
+        <div class="bg-slate-900/80 p-5 rounded-b-2xl border border-slate-800 shadow-2xl mb-6">
+            <div id="tab1-content">
+                <div id="single-mail-area"></div>
+            </div>
+            <div id="tab2-content" class="hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <span class="text-[10px] font-bold text-slate-500 tracking-widest uppercase">Danh sách tối đa 5 mail</span>
+                    <button onclick="addMail(true)" class="bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-bold px-3 py-1 rounded-full transition">+ THÊM HÒM THƯ</button>
+                </div>
+                <div id="multi-mail-list" class="space-y-3"></div>
+            </div>
+        </div>
+
+        <div class="bg-slate-900/80 rounded-2xl border border-slate-800 overflow-hidden shadow-2xl">
+            <div class="p-4 bg-slate-800/40 border-b border-slate-800 flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <div class="w-2 h-2 bg-green-500 rounded-full animate-ping"></div>
+                    <span id="current-label" class="text-xs font-mono text-blue-400 truncate max-w-[200px]">Chọn hòm thư...</span>
+                </div>
+                <button onclick="refreshInbox()" class="text-slate-500 hover:text-white transition"><i class="fa-solid fa-rotate"></i></button>
+            </div>
+            <div id="inbox-content" class="min-h-[350px] max-h-[500px] overflow-y-auto divide-y divide-slate-800/50">
+                <div class="p-20 text-center text-slate-600"><i class="fa-solid fa-envelope-open-text text-4xl mb-4 block opacity-20"></i>Hộp thư đang trống</div>
             </div>
         </div>
     </div>
-    
-    <!-- Footer info -->
-    <div class="text-center mt-4 text-[9px] text-slate-600">
-        Hỗ trợ: Mail.tm, Guerrilla, 10 Minute Mail, Temp-Mail, Emailnator, Mailsac, YOPmail, Maildrop, Inboxes, v.v...
-    </div>
-</div>
 
-<!-- Reader Modal -->
-<div id="reader-modal" class="hidden fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-2 sm:p-4 backdrop-blur-sm" onclick="if(event.target===this)closeModal()">
-    <div class="bg-slate-900 w-full max-w-2xl rounded-3xl border border-slate-700 overflow-hidden shadow-2xl modal-content flex flex-col animate-fadeIn">
-        <div class="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-800/50">
-            <h3 id="mail-subj" class="text-sm font-bold truncate pr-6 flex-1"></h3>
-            <button onclick="closeModal()" class="text-slate-400 hover:text-white text-2xl leading-none px-2">&times;</button>
+    <div id="reader-modal" class="hidden fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-2 sm:p-4">
+        <div class="bg-slate-900 w-full max-w-2xl rounded-3xl border border-slate-700 overflow-hidden shadow-2xl">
+            <div class="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-800/50">
+                <h3 id="mail-subj" class="text-sm font-bold truncate pr-6"></h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-white text-2xl">&times;</button>
+            </div>
+            <div id="mail-body" class="p-4 bg-white text-black h-[75vh] overflow-y-auto"></div>
         </div>
-        <div id="mail-body" class="p-4 bg-white text-black overflow-y-auto flex-1" style="max-height: 70vh;"></div>
     </div>
-</div>
 
-<script>
-(function() {
-    // ============ DATABASE API ============
-    const API_POOL = [
-        {
-            name: 'Mail.tm',
-            baseUrl: 'https://api.mail.tm',
-            color: '#3b82f6',
-            createAccount: async function() {
-                const domains = await fetch(`${this.baseUrl}/domains`).then(r => r.json());
-                const domain = domains['hydra:member'][0].domain;
-                const address = `${generateRandomString(8)}@${domain}`;
-                const password = 'StrongPass123!';
-                await fetch(`${this.baseUrl}/accounts`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({address, password})
-                });
-                const tokenRes = await fetch(`${this.baseUrl}/token`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({address, password})
-                }).then(r => r.json());
-                return { address, token: tokenRes.token, apiName: this.name };
+    <script>
+        const API_MAILTM = 'https://api.mail.tm';
+        const API_1SECMAIL = 'https://www.1secmail.com/api/v1/';
+        window.UltimateAPI = {
+            async create() {
+                const isMailTm = Math.random() > 0.5;
+                if (isMailTm) {
+                    const domains = await fetch(API_MAILTM + '/domains').then(r => r.json());
+                    const address = Math.random().toString(36).substring(2,12) + '@' + domains['hydra:member'][0].domain;
+                    await fetch(API_MAILTM + '/accounts', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({address, password: 'propassword123'})});
+                    const token = await fetch(API_MAILTM + '/token', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({address, password: 'propassword123'})}).then(r => r.json());
+                    return {address, token: token.token, provider: 'mailtm'};
+                } else {
+                    const d = ["1secmail.com", "1secmail.org"][Math.floor(Math.random()*2)];
+                    return {address: Math.random().toString(36).substring(2,12) + '@' + d, token: null, provider: '1secmail'};
+                }
             },
-            getMessages: async function(token) {
-                const res = await fetch(`${this.baseUrl}/messages`, {
-                    headers: {'Authorization': `Bearer ${token}`}
-                }).then(r => r.json());
-                return res['hydra:member'] || [];
+            async getInbox(m) {
+                if (m.provider === 'mailtm') {
+                    const res = await fetch(API_MAILTM + '/messages', {headers: {'Authorization': 'Bearer ' + m.token}}).then(r => r.json());
+                    return res['hydra:member'].map(x => ({id: x.id, from: x.from.address, subject: x.subject, date: x.createdAt}));
+                } else {
+                    const [u, d] = m.address.split('@');
+                    const res = await fetch(`${API_1SECMAIL}?action=getMessages&login=${u}&domain=${d}`).then(r => r.json());
+                    return res.map(x => ({id: x.id, from: x.from, subject: x.subject, date: x.date}));
+                }
             },
-            getMessage: async function(id, token) {
-                return await fetch(`${this.baseUrl}/messages/${id}`, {
-                    headers: {'Authorization': `Bearer ${token}`}
-                }).then(r => r.json());
+            async read(m, id) {
+                if (m.provider === 'mailtm') {
+                    const res = await fetch(API_MAILTM + '/messages/' + id, {headers: {'Authorization': 'Bearer ' + m.token}}).then(r => r.json());
+                    return res.html[0] || res.text;
+                } else {
+                    const [u, d] = m.address.split('@');
+                    const res = await fetch(`${API_1SECMAIL}?action=readMessage&login=${u}&domain=${d}&id=${id}`).then(r => r.json());
+                    return res.htmlBody || res.textBody;
+                }
             }
-        },
-        {
-            name: 'Guerrilla Mail',
-            baseUrl: 'https://api.guerrillamail.com/ajax.php',
-            color: '#10b981',
-            createAccount: async function() {
-                const res = await fetch(`${this.baseUrl}?f=get_email_address&ip=127.0.0.1&agent=temp_mail_app`).then(r => r.json());
-                return { 
-                    address: res.email_addr, 
-                    token: res.sid_token,
-                    apiName: this.name,
-                    sidToken: res.sid_token
-                };
-            },
-            getMessages: async function(token) {
-                const res = await fetch(`${this.baseUrl}?f=get_email_list&offset=0&sid_token=${token}`).then(r => r.json());
-                return (res.list || []).map(m => ({
-                    id: m.mail_id,
-                    from: { address: m.mail_from },
-                    subject: m.mail_subject,
-                    createdAt: m.mail_timestamp * 1000,
-                    excerpt: m.mail_excerpt
-                }));
-            },
-            getMessage: async function(id, token) {
-                const res = await fetch(`${this.baseUrl}?f=fetch_email&email_id=${id}&sid_token=${token}`).then(r => r.json());
-                return {
-                    subject: res.mail_subject,
-                    html: res.mail_body,
-                    text: res.mail_body
-                };
-            }
-        },
-        {
-            name: '10 Minute Mail',
-            baseUrl: 'https://10minutemail.net',
-            color:
+        };
+
+        let singleMail = JSON.parse(localStorage.getItem('singleMail')) || null;
+        let multiMails = JSON.parse(localStorage.getItem('multiMails')) || [];
+        let activeView = null;
+
+        async function addMail(isMulti) {
+            const m = await UltimateAPI.create();
+            if (isMulti) multiMails.push(m); else singleMail = m;
+            saveAndRender(); selectMail(m);
+        }
+
+        async function selectMail(m) { activeView = m; document.getElementById('current-label').innerText = m.address; refreshInbox(); }
+
+        async function refreshInbox() {
+            if(!activeView) return;
+            const ms = await UltimateAPI.getInbox(activeView);
+            document.getElementById('inbox-content').innerHTML = ms.length ? ms.map(m => `
+                <div onclick="readMail('${m.id}')" class="p-4 cursor-pointer border-b border-slate-800">
+                    <div class="text-xs text-blue-400">${m.from}</div>
+                    <div class="text-sm font-bold">${m.subject || 'Không tiêu đề'}</div>
+                </div>`).join('') : '<div class="p-20 text-center">Đang chờ thư...</div>';
+        }
+
+        async function readMail(id) {
+            const body = await UltimateAPI.read(activeView, id);
+            document.getElementById('mail-body').innerHTML = body;
+            document.getElementById('reader-modal').classList.remove('hidden');
+        }
+
+        function saveAndRender() {
+            localStorage.setItem('singleMail', JSON.stringify(singleMail));
+            localStorage.setItem('multiMails', JSON.stringify(multiMails));
+            document.getElementById('single-mail-area').innerHTML = singleMail ? `<div class="p-4 bg-slate-800 rounded">${singleMail.address}</div>` : `<button onclick="addMail(false)" class="w-full py-4 border-2 border-dashed rounded">Tạo Mail</button>`;
+            document.getElementById('multi-mail-list').innerHTML = multiMails.map((m, i) => `<div class="p-3 bg-slate-800 rounded">${m.address}</div>`).join('');
+        }
+
+        function switchTab(t) {
+            document.getElementById('tab1-content').classList.toggle('hidden', t !== 1);
+            document.getElementById('tab2-content').classList.toggle('hidden', t !== 2);
+        }
+        function closeModal() { document.getElementById('reader-modal').classList.add('hidden'); }
+        saveAndRender();
+    </script>
+</body>
+</html>
